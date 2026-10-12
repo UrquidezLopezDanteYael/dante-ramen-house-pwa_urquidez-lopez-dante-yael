@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dante Ramen House - Ramen y Cocina Asiática</title>
+  <!-- La descripción es el texto que Google muestra bajo el título en los
+       resultados de búsqueda (Lighthouse la revisa en la categoría SEO) -->
+  <meta name="description" content="Dante Ramen House: menú de ramen, entradas, bebidas y postres, carrito de compras y ubicación de la sucursal en Hermosillo, disponible incluso sin conexión.">
+
+  <!-- Estas 3 líneas son las que convierten este sitio en una PWA instalable -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#28309F">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+
+  <link rel="stylesheet" href="css/estilos.css">
+
+  <!-- Leaflet: librería de mapas gratuita (sin API key) que usamos solo para
+       dibujar la ruta hasta la sucursal (ver js/geolocalizacion.js) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+</head>
+<body>
+
+  <!-- ============ APP SHELL ============
+       El "app shell" es el esqueleto que SIEMPRE se ve igual (header, nav,
+       contenedores vacíos). El Service Worker lo cachea completo para que
+       cargue instantáneo incluso sin internet; solo los DATOS de adentro
+       cambian (los llena JavaScript, ver csr.js). -->
+
+  <header class="appbar">
+    <div class="appbar__brand">
+      <img src="icons/RAMENLOGO.png" alt="Logo Dante Ramen House" class="appbar__logo">
+      <h1>Dante Ramen House</h1>
+    </div>
+    <!-- este <span> lo actualiza app.js para mostrar conectado/sin conexión -->
+    <span id="estado-conexion" class="pill">conectado</span>
+  </header>
+
+  <main>
+    <!-- ---- Sección 1: Menú (CSR) ---- -->
+    <section>
+      <h2>Menú</h2>
+      <!-- Este div empieza VACÍO a propósito: si ves el código fuente (Ctrl+U)
+           no verás ningún producto aquí. JavaScript (csr.js) lo llena DESPUÉS
+           de que la página ya cargó: por eso es "Renderizado en el Cliente" (CSR). -->
+      <!-- Mientras llegan los datos, 4 tarjetas "esqueleto" apartan el espacio
+           de la primera fila de catalogo.json: así el contenido de abajo no
+           "brinca" cuando csr.js dibuja los productos (Lighthouse lo mide como CLS). -->
+      <div id="catalogo" class="grid" aria-busy="true" aria-label="Cargando menú">
+        <div class="producto producto--cargando" aria-hidden="true">
+          <div class="producto__foto"></div>
+          <strong>&nbsp;</strong> <span class="precio">&nbsp;</span> <p>&nbsp;</p>
+          <button type="button" disabled>Agregar al carrito</button>
+        </div>
+        <div class="producto producto--cargando" aria-hidden="true">
+          <div class="producto__foto"></div>
+          <strong>&nbsp;</strong> <span class="precio">&nbsp;</span> <p>&nbsp;</p>
+          <button type="button" disabled>Agregar al carrito</button>
+        </div>
+        <div class="producto producto--cargando" aria-hidden="true">
+          <div class="producto__foto"></div>
+          <strong>&nbsp;</strong> <span class="precio">&nbsp;</span> <p>&nbsp;</p>
+          <button type="button" disabled>Agregar al carrito</button>
+        </div>
+        <div class="producto producto--cargando" aria-hidden="true">
+          <div class="producto__foto"></div>
+          <strong>&nbsp;</strong> <span class="precio">&nbsp;</span> <p>&nbsp;</p>
+          <button type="button" disabled>Agregar al carrito</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- Sección 2: Carrito ---- -->
+    <!-- <section>
+      <h2>Carrito</h2>
+      <ul id="carrito-lista"></ul>
+      <p>Total: $<span id="carrito-total">0</span> MXN</p>
+      <button id="btn-sincronizar" type="button">Sincronizar carrito</button>
+      <p id="carrito-mensaje" class="mensaje"></p>
+    </section> -->
+
+    <!-- ---- Sección 3: Notificaciones ---- -->
+    <!-- <section>
+      <h2>Notificaciones de ofertas</h2>
+      <button id="btn-notificar" type="button">Activar notificaciones</button>
+      <p id="notificaciones-mensaje" class="mensaje"></p>
+    </section> -->
+
+    <!-- ---- Sección 4: Ubicación (característica del dispositivo) ---- -->
+    <!-- <section> -->
+      <!-- <h2>Distancia a la sucursal</h2> -->
+      <!-- <p class="sucursal-info">Sucursal única: <strong>Dante Ramen House</strong>, Av. Reforma 1234, Hermosillo, Sonora.</p> -->
+      <!-- <button id="btn-ubicacion" type="button">Usar mi ubicación</button> -->
+      <!-- <p id="ubicacion-mensaje" class="mensaje"></p> -->
+      <!-- Empieza oculto: geolocalizacion.js le quita "hidden" y lo llena de mapa
+           en cuanto tiene tu ubicación y la ruta hasta la sucursal -->
+      <!-- <div id="mapa-ruta" class="mapa" hidden></div> -->
+    <!-- </section> -->
+  </main>
+
+  <footer>
+    <div class="footer__contenido">
+      <div class="footer__columna">
+        <h3>HORARIO</h3>
+        <p>Lunes a domingo<br>10:00 a. m. a 10:00 p. m.</p>
+      </div>
+
+      <div class="footer__columna">
+        <h3>UBICACIÓN</h3>
+        <p>Av. Reforma 1234,<br>Hermosillo, Sonora</p>
+      </div>
+
+      <div class="footer__columna">
+        <h3>CONTACTO</h3>
+        <p>Tel. 662 123 4567<br>Instagram: @dante.ramenhouse</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Cargamos los scripts al final del <body>: así el HTML ya existe
+       cuando el JavaScript intenta buscar los elementos con document.getElementById -->
+  <!-- <script src="js/carrito.js"></script> -->
+  <script src="js/csr.js"></script>
+  <!-- <script src="js/notificaciones.js"></script> -->
+  <!-- Leaflet debe cargar ANTES de geolocalizacion.js: ese script usa el
+       objeto global "L" que esta librería crea -->
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script> -->
+  <!-- <script src="js/geolocalizacion.js"></script> -->
+  <script src="js/app.js"></script>
+  <!-- Registro del Service Worker. Va aquí, dentro del HTML y en una sola línea
+       (navigator.serviceWorker.register("sw.js")), porque así lo detecta PWABuilder:
+       lee el index.html buscando ese texto, y si no lo halla abre la página y pregunta
+       de inmediato si ya hay un Service Worker; por eso no esperamos al evento "load". -->
+  <!-- <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js")
+        .then((registro) => console.log("Service Worker registrado con éxito:", registro.scope))
+        .catch((error) => console.error("No se pudo registrar el Service Worker:", error));
+    }
+  </script> -->
+</body>
+</html>

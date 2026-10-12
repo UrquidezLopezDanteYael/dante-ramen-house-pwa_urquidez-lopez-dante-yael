@@ -1,0 +1,17 @@
+[
+  {"id":1,"nombre":"Shoyu Clásico","categoria":"Ramen","precio":139,"stock":20,"imagen":"img/Shoyu-clasico.jpg"},
+  {"id":2,"nombre":"Miso Picante","categoria":"Ramen","precio":149,"stock":20,"imagen":"img/Miso-Picante.jpg"},
+  {"id":3,"nombre":"Tonkotsu Dante","categoria":"Ramen","precio":159,"stock":20,"imagen":"img/Tonkotsu-Ramen.webp"},
+  {"id":4,"nombre":"Ramen de Pollo","categoria":"Ramen","precio":135,"stock":20,"imagen":"img/Ramen-Pollo.jpg"},
+  {"id":5,"nombre":"Ramen Vegano","categoria":"Ramen","precio":129,"stock":20,"imagen":"img/Ramen-Vegano.jpg"},
+  {"id":6,"nombre":"Gyozas (5 pzas)","categoria":"Entradas","precio":89,"stock":20,"imagen":"img/Gyozas.webp"},
+  {"id":7,"nombre":"Edamames","categoria":"Entradas","precio":65,"stock":20,"imagen":"img/Edamames.jpg"},
+  {"id":8,"nombre":"Takoyaki (6 pzas)","categoria":"Entradas","precio":95,"stock":20,"imagen":"img/Takoyaki.jpg"},
+  {"id":9,"nombre":"Karaage","categoria":"Entradas","precio":99,"stock":20,"imagen":"img/Karaage.jpg"},
+  {"id":10,"nombre":"Té verde helado","categoria":"Bebidas","precio":45,"stock":20,"imagen":"img/te-verde.webp"},
+  {"id":11,"nombre":"Limonada de yuzu","categoria":"Bebidas","precio":55,"stock":20,"imagen":"img/limonada-yuzu.webp"},
+  {"id":12,"nombre":"Ramune","categoria":"Bebidas","precio":55,"stock":20,"imagen":"img/ramune.webp"},
+  {"id":13,"nombre":"Cerveza japonesa","categoria":"Bebidas","precio":75,"stock":20,"imagen":"img/cerveza-japonesa.jpg"},
+  {"id":14,"nombre":"Mochi helado (3 pzas)","categoria":"Postres","precio":75,"stock":20,"imagen":"img/Mochi-Helado.webp"},
+  {"id":15,"nombre":"Dorayaki","categoria":"Postres","precio":65,"stock":20,"imagen":"img/Dorayaki.jpg"}
+]
