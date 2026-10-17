@@ -46,6 +46,8 @@
       <!-- Mientras llegan los datos, 4 tarjetas "esqueleto" apartan el espacio
            de la primera fila de catalogo.json: así el contenido de abajo no
            "brinca" cuando csr.js dibuja los productos (Lighthouse lo mide como CLS). -->
+      <!-- Botones de categoría: csr.js los genera a partir de catalogo.json -->
+      <div id="filtros" class="filtros" role="group" aria-label="Filtrar por categoría"></div>
       <div id="catalogo" class="grid" aria-busy="true" aria-label="Cargando menú">
         <div class="producto producto--cargando" aria-hidden="true">
           <div class="producto__foto"></div>
@@ -71,13 +73,14 @@
     </section>
 
     <!-- ---- Sección 2: Carrito ---- -->
-    <!-- <section>
+    <section>
       <h2>Carrito</h2>
       <ul id="carrito-lista"></ul>
       <p>Total: $<span id="carrito-total">0</span> MXN</p>
-      <button id="btn-sincronizar" type="button">Sincronizar carrito</button>
-      <p id="carrito-mensaje" class="mensaje"></p>
-    </section> -->
+      <!-- Se activa en un paso posterior:
+      <button id="btn-sincronizar" type="button">Sincronizar carrito</button> -->
+      <p id="carrito-mensaje" class="mensaje" aria-live="polite"></p>
+    </section>
 
     <!-- ---- Sección 3: Notificaciones ---- -->
     <!-- <section>
@@ -119,7 +122,7 @@
 
   <!-- Cargamos los scripts al final del <body>: así el HTML ya existe
        cuando el JavaScript intenta buscar los elementos con document.getElementById -->
-  <!-- <script src="js/carrito.js"></script> -->
+  <script src="js/carrito.js"></script>
   <script src="js/csr.js"></script>
   <!-- <script src="js/notificaciones.js"></script> -->
   <!-- Leaflet debe cargar ANTES de geolocalizacion.js: ese script usa el

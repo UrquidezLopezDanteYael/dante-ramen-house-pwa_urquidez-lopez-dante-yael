@@ -129,6 +129,7 @@ section h2 {
 .producto__foto {
   display: block;
   width: 100%;
+  height: auto;
   aspect-ratio: 1 / 1;
   object-fit: cover;
   border-radius: 10px;
@@ -164,6 +165,57 @@ section h2 {
 .producto--cargando .precio { display: inline-block; width: 30%; }
 .producto--cargando p { width: 45%; }
 .producto--cargando button { visibility: hidden; }
+
+/* ==================== FILTROS POR CATEGORÍA ==================== */
+[hidden] {
+  display: none !important;
+}
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-height: 2.6rem; /* aparta el espacio mientras se generan los botones */
+  margin-bottom: 1rem;
+}
+
+.filtro {
+  width: auto;
+  margin: 0;
+  padding: 0.4rem 1rem;
+  background: white;
+  color: var(--azul);
+  border: 2px solid var(--azul);
+  font-family: var(--fuente-detalle);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.filtro:hover {
+  background: #eceeff;
+}
+
+.filtro[aria-pressed="true"],
+.filtro[aria-pressed="true"]:hover {
+  background: var(--azul);
+  color: white;
+}
+
+.categoria-titulo {
+  grid-column: 1 / -1;
+  margin: 0.5rem 0 0;
+  padding-bottom: 0.25rem;
+  font-family: var(--fuente-titulo);
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: var(--coral-oscuro);
+  border-bottom: 2px dotted var(--amarillo);
+}
+
+.categoria-titulo:first-child {
+  margin-top: 0;
+}
 
 /* ==================== BOTONES Y MENSAJES ==================== */
 button {
@@ -228,6 +280,12 @@ button:focus-visible {
   gap: 0.6rem;
   border-bottom: 2px dotted var(--amarillo);
   padding: 0.6rem 0;
+}
+
+#carrito-lista .carrito-vacio {
+  display: block;
+  border-bottom: none;
+  font-size: 0.9rem;
 }
 
 .carrito-nombre {

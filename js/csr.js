@@ -1,42 +1,105 @@
-// csr.js — Renderizado en el Cliente (CSR)
-// "CSR" significa que el HTML llega casi vacío y es ESTE archivo JavaScript,
-// ya corriendo en el navegador del usuario, quien construye el contenido.
+// Renderizado en el Cliente (CSR): lee catalogo.json y dibuja el menú
+// agrupado por categoría, con botones para filtrar.
+const catalogoEl = document.getElementById("catalogo");
+const filtrosEl = document.getElementById("filtros");
 
-// 1) Buscamos el contenedor vacío que dejamos en index.html
-const contenedorCatalogo = document.getElementById("catalogo");
+function crearTarjeta(producto) {
+  const tarjeta = document.createElement("article");
+  tarjeta.className = "producto";
+  tarjeta.dataset.categoria = producto.categoria;
 
-// 2) fetch() le pide el archivo catalogo.json al servidor (aquí simula una API real).
-//    fetch() devuelve una "promesa": un valor que llegará más adelante, no de inmediato.
+  const foto = new Image(300, 300);
+  foto.className = "producto__foto";
+  foto.alt = producto.nombre;
+  foto.loading = "lazy";
+  foto.src = producto.imagen;
+  // Si la imagen no existe, se queda el recuadro de fondo en vez del ícono roto
+  foto.addEventListener("error", () => {
+    foto.alt = "";
+    foto.removeAttribute("src");
+  });
+
+  const nombre = document.createElement("strong");
+  nombre.textContent = producto.nombre;
+
+  const precio = document.createElement("span");
+  precio.className = "precio";
+  precio.textContent = `$${producto.precio} MXN`;
+
+  const boton = document.createElement("button");
+  boton.type = "button";
+  boton.dataset.id = producto.id;
+  boton.textContent = producto.stock > 0 ? "Agregar al carrito" : "Agotado";
+  boton.disabled = producto.stock <= 0;
+  // carrito.js puede escuchar este evento para agregar el producto
+  boton.addEventListener("click", () => {
+    document.dispatchEvent(new CustomEvent("producto:agregar", { detail: producto }));
+  });
+
+  tarjeta.append(foto, nombre, precio, boton);
+  return tarjeta;
+}
+
+function filtrar(categoria) {
+  const todos = categoria === "Todos";
+
+  filtrosEl.querySelectorAll(".filtro").forEach((boton) => {
+    boton.setAttribute("aria-pressed", boton.dataset.categoria === categoria);
+  });
+
+  catalogoEl.querySelectorAll("[data-categoria]").forEach((elemento) => {
+    const esTitulo = elemento.classList.contains("categoria-titulo");
+    elemento.hidden = esTitulo ? !todos : !(todos || elemento.dataset.categoria === categoria);
+  });
+}
+
+function crearFiltros(categorias) {
+  const botones = ["Todos", ...categorias].map((categoria) => {
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = "filtro";
+    boton.dataset.categoria = categoria;
+    boton.textContent = categoria;
+    boton.setAttribute("aria-pressed", categoria === "Todos");
+    return boton;
+  });
+  filtrosEl.replaceChildren(...botones);
+}
+
+function dibujarCatalogo(productos) {
+  const categorias = [...new Set(productos.map((p) => p.categoria))];
+  const fragmento = document.createDocumentFragment();
+
+  categorias.forEach((categoria) => {
+    const titulo = document.createElement("h3");
+    titulo.className = "categoria-titulo";
+    titulo.dataset.categoria = categoria;
+    titulo.textContent = categoria;
+    fragmento.append(titulo);
+
+    productos
+      .filter((p) => p.categoria === categoria)
+      .forEach((p) => fragmento.append(crearTarjeta(p)));
+  });
+
+  crearFiltros(categorias);
+  catalogoEl.replaceChildren(fragmento);
+  catalogoEl.removeAttribute("aria-busy");
+  catalogoEl.setAttribute("aria-label", "Menú");
+}
+
+filtrosEl.addEventListener("click", (evento) => {
+  const boton = evento.target.closest(".filtro");
+  if (boton) filtrar(boton.dataset.categoria);
+});
+
 fetch("catalogo.json")
-  .then((respuesta) => respuesta.json()) // convierte el texto recibido en un array de objetos JS
-  .then((productos) => {
-    // 3) Ya tenemos los productos: borramos el "Cargando…" y dibujamos las tarjetas
-    contenedorCatalogo.innerHTML = "";
-
-    productos.forEach((producto) => {
-      // creamos un <div class="producto"> por cada producto, desde JavaScript puro
-      const tarjeta = document.createElement("div");
-      tarjeta.className = "producto";
-
-      // usamos el propio objeto "producto" para llenar el texto (sin plantillas de servidor)
-      tarjeta.innerHTML = `
-        <img class="producto__foto" src="${producto.imagen}" alt="${producto.nombre}" loading="lazy">
-        <strong>${producto.nombre}</strong>
-        <span class="precio">$${producto.precio}</span>
-        <p>Stock: ${producto.stock}</p>
-        <button type="button" data-id="${producto.id}">Agregar al carrito</button>
-      `;
-
-      contenedorCatalogo.appendChild(tarjeta);
-
-      // conectamos el botón recién creado con la función agregarAlCarrito() de carrito.js
-      tarjeta.querySelector("button").addEventListener("click", () => {
-        agregarAlCarrito(producto);
-      });
-    });
+  .then((respuesta) => {
+    if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
+    return respuesta.json();
   })
-  .catch((error) => {
-    // si algo falla (por ejemplo, sin conexión y sin caché), avisamos en pantalla
-    contenedorCatalogo.innerHTML = "<p>No se pudo cargar el catálogo. Intenta más tarde.</p>";
-    console.error("Error al cargar catálogo:", error);
+  .then(dibujarCatalogo)
+  .catch(() => {
+    catalogoEl.removeAttribute("aria-busy");
+    catalogoEl.innerHTML = '<p class="mensaje">No se pudo cargar el menú. Revisa tu conexión.</p>';
   });
