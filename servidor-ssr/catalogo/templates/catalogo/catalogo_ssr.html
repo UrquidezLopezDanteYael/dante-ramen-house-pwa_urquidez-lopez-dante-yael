@@ -1,0 +1,53 @@
+{% load static %}<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Menú SSR - Dante Ramen House</title>
+  <link rel="stylesheet" href="{% static 'catalogo/estilos.css' %}">
+</head>
+<body>
+  <header class="appbar">
+    <div class="appbar__brand">
+      <img src="{% static 'catalogo/RAMENLOGO.png' %}" alt="Logo Dante Ramen House" class="appbar__logo">
+      <h1>Dante Ramen House</h1>
+    </div>
+    <span class="pill">renderizado en servidor</span>
+  </header>
+
+  <main>
+    <section>
+      <h2>Menú</h2>
+      <div class="grid">
+        {% for categoria, productos in categorias.items %}
+          <h3 class="categoria-titulo">{{ categoria }}</h3>
+          {% for producto in productos %}
+            <article class="producto">
+              <strong>{{ producto.nombre }}</strong>
+              <span class="precio">${{ producto.precio }} MXN</span>
+              <p>{{ producto.stock }} disponibles</p>
+            </article>
+          {% endfor %}
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer__contenido">
+      <div class="footer__columna">
+        <h3>HORARIO</h3>
+        <p>Lunes a domingo<br>10:00 a. m. a 10:00 p. m.</p>
+      </div>
+      <div class="footer__columna">
+        <h3>UBICACIÓN</h3>
+        <p>Av. Reforma 1234,<br>Hermosillo, Sonora</p>
+      </div>
+      <div class="footer__columna">
+        <h3>CONTACTO</h3>
+        <p>Tel. 662 123 4567<br>Instagram: @dante.ramenhouse</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
