@@ -11,7 +11,7 @@
   <!-- Estas 3 líneas son las que convierten este sitio en una PWA instalable -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#28309F">
-  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
 
   <link rel="stylesheet" href="css/estilos.css">
 
@@ -77,17 +77,16 @@
       <h2>Carrito</h2>
       <ul id="carrito-lista"></ul>
       <p>Total: $<span id="carrito-total">0</span> MXN</p>
-      <!-- Se activa en un paso posterior:
-      <button id="btn-sincronizar" type="button">Sincronizar carrito</button> -->
+      <button id="btn-sincronizar" type="button">Sincronizar carrito</button>
       <p id="carrito-mensaje" class="mensaje" aria-live="polite"></p>
     </section>
 
     <!-- ---- Sección 3: Notificaciones ---- -->
-    <!-- <section>
+    <section>
       <h2>Notificaciones de ofertas</h2>
       <button id="btn-notificar" type="button">Activar notificaciones</button>
-      <p id="notificaciones-mensaje" class="mensaje"></p>
-    </section> -->
+      <p id="notificaciones-mensaje" class="mensaje" aria-live="polite"></p>
+    </section>
 
     <!-- ---- Sección 4: Ubicación (característica del dispositivo) ---- -->
     <!-- <section> -->
@@ -124,7 +123,7 @@
        cuando el JavaScript intenta buscar los elementos con document.getElementById -->
   <script src="js/carrito.js"></script>
   <script src="js/csr.js"></script>
-  <!-- <script src="js/notificaciones.js"></script> -->
+  <script src="js/notificaciones.js"></script>
   <!-- Leaflet debe cargar ANTES de geolocalizacion.js: ese script usa el
        objeto global "L" que esta librería crea -->
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script> -->

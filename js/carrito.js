@@ -1,14 +1,16 @@
-// Carrito de compras: agregar, sumar/restar, quitar y total.
-// Se guarda en localStorage para que siga ahí al recargar la página.
-const CLAVE = "carrito-dante";
+// carrito.js — Carrito de Dante Ramen House: almacenamiento local y "sincronización" offline/online
+// Usamos localStorage: una caja de guardado que vive DENTRO del navegador
+// y sobrevive aunque cierres la pestaña o se vaya el internet.
 
-const listaEl = document.getElementById("carrito-lista");
-const totalEl = document.getElementById("carrito-total");
-const mensajeEl = document.getElementById("carrito-mensaje");
+const CLAVE_CARRITO = "dante-ramen-carrito";
 
-let carrito = cargar();
+// Evita que un nombre con símbolos raros rompa el HTML al insertarlo con innerHTML
+function escapar(texto) {
+  const reemplazos = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+  return String(texto).replace(/[&<>"']/g, (c) => reemplazos[c]);
+}
 
-function esItemValido(item) {
+function itemValido(item) {
   return (
     item &&
     Number.isFinite(item.id) &&
@@ -19,40 +21,45 @@ function esItemValido(item) {
   );
 }
 
-function cargar() {
+// Lee el carrito guardado en localStorage (si no hay nada o está dañado, regresa un array vacío)
+function leerCarrito() {
   try {
-    const datos = JSON.parse(localStorage.getItem(CLAVE));
-    return Array.isArray(datos) ? datos.filter(esItemValido) : [];
+    const datos = JSON.parse(localStorage.getItem(CLAVE_CARRITO)); // localStorage solo guarda texto
+    return Array.isArray(datos) ? datos.filter(itemValido) : [];
   } catch {
     return [];
   }
 }
 
-function guardar() {
+// Guarda el array del carrito en localStorage (JSON.stringify lo convierte a texto)
+function guardarCarrito(carrito) {
   try {
-    localStorage.setItem(CLAVE, JSON.stringify(carrito));
+    localStorage.setItem(CLAVE_CARRITO, JSON.stringify(carrito));
   } catch {
-    // Almacenamiento lleno o bloqueado: el carrito sigue funcionando en memoria
+    // Almacenamiento lleno o bloqueado: el carrito sigue funcionando mientras la página esté abierta
   }
 }
 
+// Cuántas unidades hay disponibles de un producto (catalogo.json trae el "stock")
 function limiteDe(item) {
   return Number.isFinite(item.stock) ? item.stock : Infinity;
 }
 
-function avisar(texto = "") {
-  mensajeEl.textContent = texto;
+function mostrarMensaje(texto = "") {
+  document.getElementById("carrito-mensaje").textContent = texto;
 }
 
-function agregar(producto) {
-  const item = carrito.find((i) => i.id === producto.id);
+// Agrega un producto al carrito (o le sube la cantidad si ya estaba)
+function agregarAlCarrito(producto) {
+  const carrito = leerCarrito();
+  const existente = carrito.find((item) => item.id === producto.id);
 
-  if (item) {
-    if (item.cantidad >= limiteDe(item)) {
-      avisar(`Solo hay ${limiteDe(item)} de ${item.nombre}.`);
+  if (existente) {
+    if (existente.cantidad >= limiteDe(existente)) {
+      mostrarMensaje(`Solo hay ${limiteDe(existente)} de ${existente.nombre}.`);
       return;
     }
-    item.cantidad++;
+    existente.cantidad += 1;
   } else {
     carrito.push({
       id: producto.id,
@@ -63,108 +70,116 @@ function agregar(producto) {
     });
   }
 
-  avisar(`${producto.nombre} agregado al carrito.`);
-  actualizar();
+  mostrarMensaje(`${producto.nombre} agregado al carrito.`);
+  guardarCarrito(carrito);
+  pintarCarrito();
 }
 
+// Sube o baja la cantidad de un producto ya en el carrito con los botones +/-;
+// si la cantidad llega a 0, el producto se quita solo.
 function cambiarCantidad(id, delta) {
-  const item = carrito.find((i) => i.id === id);
+  const carrito = leerCarrito();
+  const item = carrito.find((item) => item.id === id);
   if (!item) return;
 
-  const nueva = item.cantidad + delta;
-  if (nueva < 1) return;
-  if (nueva > limiteDe(item)) {
-    avisar(`Solo hay ${limiteDe(item)} de ${item.nombre}.`);
+  if (delta > 0 && item.cantidad >= limiteDe(item)) {
+    mostrarMensaje(`Solo hay ${limiteDe(item)} de ${item.nombre}.`);
     return;
   }
 
-  item.cantidad = nueva;
-  avisar();
-  actualizar();
+  item.cantidad += delta;
+  const actualizado = item.cantidad <= 0 ? carrito.filter((item) => item.id !== id) : carrito;
+
+  mostrarMensaje();
+  guardarCarrito(actualizado);
+  pintarCarrito();
 }
 
-function quitar(id) {
-  carrito = carrito.filter((i) => i.id !== id);
-  avisar();
-  actualizar();
+// Quita un producto del carrito sin importar su cantidad
+function quitarDelCarrito(id) {
+  const carrito = leerCarrito().filter((item) => item.id !== id);
+  mostrarMensaje();
+  guardarCarrito(carrito);
+  pintarCarrito();
 }
 
-function actualizar() {
-  guardar();
-  render();
-}
+// Dibuja el carrito en pantalla a partir de lo que hay en localStorage.
+// La cantidad va en su propia columna (con botones - / +), separada del
+// nombre y del precio.
+function pintarCarrito() {
+  const carrito = leerCarrito();
+  const lista = document.getElementById("carrito-lista");
+  const total = document.getElementById("carrito-total");
 
-function crearBoton(texto, accion, item, etiqueta, clase = "") {
-  const boton = document.createElement("button");
-  boton.type = "button";
-  boton.textContent = texto;
-  boton.dataset.accion = accion;
-  boton.dataset.id = item.id;
-  boton.setAttribute("aria-label", `${etiqueta} ${item.nombre}`);
-  if (clase) boton.className = clase;
-  return boton;
-}
+  lista.innerHTML = "";
+  let suma = 0;
 
-function crearFila(item) {
-  const fila = document.createElement("li");
-
-  const nombre = document.createElement("span");
-  nombre.className = "carrito-nombre";
-  nombre.textContent = item.nombre;
-
-  const cantidad = document.createElement("div");
-  cantidad.className = "carrito-cantidad";
-  const menos = crearBoton("−", "restar", item, "Restar una unidad de");
-  menos.disabled = item.cantidad <= 1;
-  const valor = document.createElement("span");
-  valor.className = "carrito-cantidad__valor";
-  valor.textContent = item.cantidad;
-  const mas = crearBoton("+", "sumar", item, "Sumar una unidad de");
-  mas.disabled = item.cantidad >= limiteDe(item);
-  cantidad.append(menos, valor, mas);
-
-  const precio = document.createElement("span");
-  precio.className = "carrito-precio";
-  precio.textContent = `$${(item.precio * item.cantidad).toLocaleString("es-MX")}`;
-
-  const quitarBtn = crearBoton("Quitar", "quitar", item, "Quitar del carrito", "carrito-quitar");
-
-  fila.append(nombre, cantidad, precio, quitarBtn);
-  return fila;
-}
-
-function render() {
   if (carrito.length === 0) {
-    const vacio = document.createElement("li");
-    vacio.className = "carrito-vacio";
-    vacio.textContent = "Tu carrito está vacío.";
-    listaEl.replaceChildren(vacio);
-  } else {
-    listaEl.replaceChildren(...carrito.map(crearFila));
+    lista.innerHTML = '<li class="carrito-vacio">Tu carrito está vacío.</li>';
   }
 
-  const total = carrito.reduce((suma, i) => suma + i.precio * i.cantidad, 0);
-  totalEl.textContent = total.toLocaleString("es-MX");
+  carrito.forEach((item) => {
+    const subtotal = item.precio * item.cantidad;
+    suma += subtotal;
+    const nombre = escapar(item.nombre);
+
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <span class="carrito-nombre">${nombre}</span>
+      <span class="carrito-cantidad">
+        <button type="button" data-accion="restar" data-id="${item.id}" aria-label="Quitar una unidad de ${nombre}">−</button>
+        <span class="carrito-cantidad__valor">${item.cantidad}</span>
+        <button type="button" data-accion="sumar" data-id="${item.id}" aria-label="Agregar una unidad de ${nombre}"${item.cantidad >= limiteDe(item) ? " disabled" : ""}>+</button>
+      </span>
+      <span class="carrito-precio">$${subtotal.toLocaleString("es-MX")}</span>
+      <button type="button" class="carrito-quitar" data-accion="quitar" data-id="${item.id}" aria-label="Quitar ${nombre} del carrito">Quitar</button>
+    `;
+    lista.appendChild(li);
+  });
+
+  total.textContent = suma.toLocaleString("es-MX");
 }
 
-// Los botones "Agregar al carrito" (csr.js) avisan con este evento
-document.addEventListener("producto:agregar", (evento) => agregar(evento.detail));
-
-listaEl.addEventListener("click", (evento) => {
+// Un solo listener en <ul id="carrito-lista"> atiende los clics de TODOS los
+// botones +/-/Quitar (delegación de eventos), incluso los que se crean después
+// dinámicamente cada vez que pintarCarrito() vuelve a dibujar la lista.
+function manejarClicCarrito(evento) {
   const boton = evento.target.closest("button[data-accion]");
   if (!boton) return;
 
   const id = Number(boton.dataset.id);
   if (boton.dataset.accion === "sumar") cambiarCantidad(id, 1);
-  else if (boton.dataset.accion === "restar") cambiarCantidad(id, -1);
-  else if (boton.dataset.accion === "quitar") quitar(id);
-});
+  if (boton.dataset.accion === "restar") cambiarCantidad(id, -1);
+  if (boton.dataset.accion === "quitar") quitarDelCarrito(id);
+}
 
-// Si el carrito cambia en otra pestaña, se refleja aquí
-window.addEventListener("storage", (evento) => {
-  if (evento.key !== CLAVE) return;
-  carrito = cargar();
-  render();
-});
+// "Sincronizar": en una app real esto haría un fetch() con method: "POST" al
+// servidor. Aquí lo simulamos para enseñar el patrón offline -> online.
+function sincronizarCarrito() {
+  if (!navigator.onLine) {
+    // navigator.onLine: propiedad del navegador que dice si hay conexión
+    mostrarMensaje("Sin conexión: tu pedido se sincronizará cuando vuelva el internet.");
+    return;
+  }
 
-render();
+  // Aquí iría: fetch("https://mi-api.com/pedidos", { method: "POST", body: ... })
+  mostrarMensaje("Carrito sincronizado con Dante Ramen House (simulado). ✓");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  pintarCarrito();
+  document.getElementById("carrito-lista").addEventListener("click", manejarClicCarrito);
+  document.getElementById("btn-sincronizar")?.addEventListener("click", sincronizarCarrito);
+
+  // Los botones "Agregar al carrito" de csr.js avisan con este evento
+  document.addEventListener("producto:agregar", (evento) => agregarAlCarrito(evento.detail));
+
+  // Estos eventos del navegador avisan cuando se pierde o regresa la conexión
+  window.addEventListener("online", sincronizarCarrito);
+  window.addEventListener("offline", () => mostrarMensaje("Se perdió la conexión."));
+
+  // Si el carrito cambia en otra pestaña, se refleja aquí
+  window.addEventListener("storage", (evento) => {
+    if (evento.key === CLAVE_CARRITO) pintarCarrito();
+  });
+});
