@@ -6,6 +6,7 @@ const filtrosEl = document.getElementById("filtros");
 function crearTarjeta(producto) {
   const tarjeta = document.createElement("article");
   tarjeta.className = "producto";
+  tarjeta.dataset.aparece = ""; // animaciones.js la hace aparecer al hacer scroll
   tarjeta.dataset.categoria = producto.categoria;
 
   const foto = new Image(300, 300);
@@ -13,11 +14,8 @@ function crearTarjeta(producto) {
   foto.alt = producto.nombre;
   foto.loading = "lazy";
   foto.src = producto.imagen;
-  // Si la imagen no existe, se queda el recuadro de fondo en vez del ícono roto
-  foto.addEventListener("error", () => {
-    foto.alt = "";
-    foto.removeAttribute("src");
-  });
+  // Si la imagen no existe, se quita y la tarjeta muestra el ícono de su categoría
+  foto.addEventListener("error", () => foto.remove());
 
   const nombre = document.createElement("strong");
   nombre.textContent = producto.nombre;
@@ -31,13 +29,32 @@ function crearTarjeta(producto) {
   boton.dataset.id = producto.id;
   boton.textContent = producto.stock > 0 ? "Agregar al carrito" : "Agotado";
   boton.disabled = producto.stock <= 0;
-  // carrito.js puede escuchar este evento para agregar el producto
+  // carrito.js escucha este evento; lo cancela si ya no hay unidades disponibles
   boton.addEventListener("click", () => {
-    document.dispatchEvent(new CustomEvent("producto:agregar", { detail: producto }));
+    const evento = new CustomEvent("producto:agregar", { detail: producto, cancelable: true });
+    if (document.dispatchEvent(evento)) confirmarAgregado(boton);
   });
 
   tarjeta.append(foto, nombre, precio, boton);
   return tarjeta;
+}
+
+// Cambia el botón a "✓ Agregado" por un segundo
+function confirmarAgregado(boton) {
+  boton.classList.add("agregado");
+  boton.textContent = "✓ Agregado";
+  clearTimeout(boton.temporizador);
+  boton.temporizador = setTimeout(() => {
+    boton.classList.remove("agregado");
+    boton.textContent = "Agregar al carrito";
+  }, 1000);
+}
+
+// Vuelve a lanzar la animación de entrada de un elemento
+function reiniciarAnimacion(elemento) {
+  elemento.style.animation = "none";
+  void elemento.offsetWidth;
+  elemento.style.animation = "";
 }
 
 function filtrar(categoria) {
@@ -50,6 +67,7 @@ function filtrar(categoria) {
   catalogoEl.querySelectorAll("[data-categoria]").forEach((elemento) => {
     const esTitulo = elemento.classList.contains("categoria-titulo");
     elemento.hidden = esTitulo ? !todos : !(todos || elemento.dataset.categoria === categoria);
+    if (!elemento.hidden && elemento.classList.contains("visible")) reiniciarAnimacion(elemento);
   });
 }
 
@@ -73,6 +91,7 @@ function dibujarCatalogo(productos) {
   categorias.forEach((categoria) => {
     const titulo = document.createElement("h3");
     titulo.className = "categoria-titulo";
+    titulo.dataset.aparece = "";
     titulo.dataset.categoria = categoria;
     titulo.textContent = categoria;
     fragmento.append(titulo);

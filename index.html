@@ -13,7 +13,10 @@
   <meta name="theme-color" content="#28309F">
   <link rel="icon" href="icons/icon-192.png" type="image/png">
 
-  <link rel="stylesheet" href="css/estilos.css">
+  <!-- Marca que hay JavaScript: así los elementos animados nunca se quedan ocultos sin él -->
+  <script>document.documentElement.classList.add("js")</script>
+  <!-- ?v=2: obliga al navegador a descargar el CSS nuevo en vez de usar el guardado -->
+  <link rel="stylesheet" href="css/estilos.css?v=2">
 
   <!-- Leaflet: librería de mapas gratuita (sin API key) que usamos solo para
        dibujar la ruta hasta la sucursal (ver js/geolocalizacion.js) -->
@@ -29,16 +32,72 @@
 
   <header class="appbar">
     <div class="appbar__brand">
-      <img src="icons/RAMENLOGO.png" alt="Logo Dante Ramen House" class="appbar__logo">
+      <img src="icons/icon-192.png" alt="Logo Dante Ramen House" class="appbar__logo">
       <h1>Dante Ramen House</h1>
     </div>
+    <nav class="appbar__nav" aria-label="Secciones">
+      <a href="#menu">Menú</a>
+      <a href="#carrito">Carrito <span class="contador" data-contador hidden>0</span></a>
+      <a href="#contacto">Contacto</a>
+    </nav>
     <!-- este <span> lo actualiza app.js para mostrar conectado/sin conexión -->
     <span id="estado-conexion" class="pill">conectado</span>
   </header>
 
-  <main>
+  <!-- ---- Portada ---- -->
+  <section class="hero">
+    <div class="hero__interior">
+      <div class="hero__texto">
+        <p class="hero__etiqueta">RAMEN &amp; ASIAN KITCHEN</p>
+        <h2 class="hero__titulo">Un tazón de ramen que <em>te abraza</em></h2>
+        <p class="hero__descripcion">Caldos de horas, fideos al momento y entradas para compartir. Arma tu pedido aquí y recógelo en nuestra sucursal de Hermosillo.</p>
+        <div class="hero__acciones">
+          <a class="boton" href="#menu">Ver el menú</a>
+          <a class="boton boton--claro" href="#contacto">Cómo llegar</a>
+        </div>
+        <ul class="hero__datos">
+          <li>Lunes a domingo</li>
+          <li>10:00 a. m. a 10:00 p. m.</li>
+          <li>Hermosillo, Sonora</li>
+        </ul>
+      </div>
+      <div class="hero__arte" aria-hidden="true">
+        <img src="icons/icon-512.png" alt="" width="512" height="512">
+      </div>
+    </div>
+  </section>
+
+  <!-- ---- Cinta animada (decorativa) ---- -->
+  <div class="cinta" aria-hidden="true">
+    <div class="cinta__pista">
+      <span>Ramen</span>
+      <span>Gyozas</span>
+      <span>Takoyaki</span>
+      <span>Karaage</span>
+      <span>Mochi</span>
+      <span>Ramune</span>
+      <span>Ramen</span>
+      <span>Gyozas</span>
+      <span>Takoyaki</span>
+      <span>Karaage</span>
+      <span>Mochi</span>
+      <span>Ramune</span>
+    </div>
+  </div>
+
+  <!-- ---- Cómo pedir ---- -->
+  <section class="pasos" aria-labelledby="titulo-pasos">
+    <h2 class="pasos__titulo" id="titulo-pasos">Pide en tres pasos</h2>
+    <ol class="pasos__lista">
+      <li class="paso" data-aparece><span class="paso__num" aria-hidden="true">1</span><h3>Elige tu platillo</h3><p>Filtra por categoría y agrega lo que se te antoje.</p></li>
+      <li class="paso" data-aparece><span class="paso__num" aria-hidden="true">2</span><h3>Arma tu pedido</h3><p>Ajusta cantidades y revisa tu total en pesos.</p></li>
+      <li class="paso" data-aparece><span class="paso__num" aria-hidden="true">3</span><h3>Pasa por él</h3><p>Te esperamos en Av. Reforma 1234, Hermosillo.</p></li>
+    </ol>
+  </section>
+
+  <main class="tienda">
     <!-- ---- Sección 1: Menú (CSR) ---- -->
-    <section>
+    <section id="menu" data-aparece>
       <h2>Menú</h2>
       <!-- Este div empieza VACÍO a propósito: si ves el código fuente (Ctrl+U)
            no verás ningún producto aquí. JavaScript (csr.js) lo llena DESPUÉS
@@ -72,63 +131,72 @@
       </div>
     </section>
 
-    <!-- ---- Sección 2: Carrito ---- -->
-    <section>
-      <h2>Carrito</h2>
-      <ul id="carrito-lista"></ul>
-      <p>Total: $<span id="carrito-total">0</span> MXN</p>
-      <button id="btn-sincronizar" type="button">Sincronizar carrito</button>
-      <p id="carrito-mensaje" class="mensaje" aria-live="polite"></p>
-    </section>
+    <aside class="lateral">
+      <!-- ---- Sección 2: Carrito ---- -->
+      <section id="carrito" data-aparece>
+        <h2>Tu pedido</h2>
+        <ul id="carrito-lista"></ul>
+        <p class="carrito-total">Total <strong>$<span id="carrito-total">0</span> MXN</strong></p>
+        <button id="btn-sincronizar" class="boton boton--claro boton--bloque" type="button">Sincronizar carrito</button>
+        <p id="carrito-mensaje" class="mensaje" aria-live="polite"></p>
+      </section>
 
-    <!-- ---- Sección 3: Notificaciones ---- -->
-    <section>
-      <h2>Notificaciones de ofertas</h2>
-      <button id="btn-notificar" type="button">Activar notificaciones</button>
-      <p id="notificaciones-mensaje" class="mensaje" aria-live="polite"></p>
-    </section>
+      <!-- ---- Sección 3: Notificaciones ---- -->
+      <section id="notificaciones" data-aparece>
+        <h2>Ofertas</h2>
+        <p class="sucursal-info">Te avisamos cuando haya promociones de ramen.</p>
+        <button id="btn-notificar" class="boton boton--claro boton--bloque" type="button">Activar notificaciones</button>
+        <p id="notificaciones-mensaje" class="mensaje" aria-live="polite"></p>
+      </section>
 
-    <!-- ---- Sección 4: Ubicación (característica del dispositivo) ---- -->
-    <!-- <section> -->
-      <!-- <h2>Distancia a la sucursal</h2> -->
-      <!-- <p class="sucursal-info">Sucursal única: <strong>Dante Ramen House</strong>, Av. Reforma 1234, Hermosillo, Sonora.</p> -->
-      <!-- <button id="btn-ubicacion" type="button">Usar mi ubicación</button> -->
-      <!-- <p id="ubicacion-mensaje" class="mensaje"></p> -->
-      <!-- Empieza oculto: geolocalizacion.js le quita "hidden" y lo llena de mapa
-           en cuanto tiene tu ubicación y la ruta hasta la sucursal -->
-      <!-- <div id="mapa-ruta" class="mapa" hidden></div> -->
-    <!-- </section> -->
+      <!-- ---- Sección 4: Ubicación (característica del dispositivo) ---- -->
+      <!-- <section> -->
+        <!-- <h2>Distancia a la sucursal</h2> -->
+        <!-- <p class="sucursal-info">Sucursal única: <strong>Dante Ramen House</strong>, Av. Reforma 1234, Hermosillo, Sonora.</p> -->
+        <!-- <button id="btn-ubicacion" type="button">Usar mi ubicación</button> -->
+        <!-- <p id="ubicacion-mensaje" class="mensaje"></p> -->
+        <!-- Empieza oculto: geolocalizacion.js le quita "hidden" y lo llena de mapa
+             en cuanto tiene tu ubicación y la ruta hasta la sucursal -->
+        <!-- <div id="mapa-ruta" class="mapa" hidden></div> -->
+      <!-- </section> -->
+    </aside>
   </main>
 
-  <footer>
+  <footer id="contacto">
     <div class="footer__contenido">
-      <div class="footer__columna">
+      <div class="footer__columna" data-aparece>
         <h3>HORARIO</h3>
         <p>Lunes a domingo<br>10:00 a. m. a 10:00 p. m.</p>
       </div>
 
-      <div class="footer__columna">
+      <div class="footer__columna" data-aparece>
         <h3>UBICACIÓN</h3>
         <p>Av. Reforma 1234,<br>Hermosillo, Sonora</p>
       </div>
 
-      <div class="footer__columna">
+      <div class="footer__columna" data-aparece>
         <h3>CONTACTO</h3>
         <p>Tel. 662 123 4567<br>Instagram: @dante.ramenhouse</p>
       </div>
     </div>
+    <p class="footer__legal">© 2026 DANTE RAMEN HOUSE · HERMOSILLO, SONORA</p>
+    <div class="footer__olas" aria-hidden="true"></div>
   </footer>
+
+  <!-- Botón flotante para ir al pedido (solo se ve en celular) -->
+  <a class="fab" href="#carrito" aria-label="Ver mi pedido">Ver pedido <span class="contador" data-contador hidden>0</span></a>
 
   <!-- Cargamos los scripts al final del <body>: así el HTML ya existe
        cuando el JavaScript intenta buscar los elementos con document.getElementById -->
-  <script src="js/carrito.js"></script>
-  <script src="js/csr.js"></script>
-  <script src="js/notificaciones.js"></script>
+  <script src="js/carrito.js?v=2"></script>
+  <script src="js/csr.js?v=2"></script>
+  <script src="js/notificaciones.js?v=2"></script>
+  <script src="js/animaciones.js?v=2"></script>
   <!-- Leaflet debe cargar ANTES de geolocalizacion.js: ese script usa el
        objeto global "L" que esta librería crea -->
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script> -->
   <!-- <script src="js/geolocalizacion.js"></script> -->
-  <script src="js/app.js"></script>
+  <script src="js/app.js?v=2"></script>
   <!-- Registro del Service Worker. Va aquí, dentro del HTML y en una sola línea
        (navigator.serviceWorker.register("sw.js")), porque así lo detecta PWABuilder:
        lee el index.html buscando ese texto, y si no lo halla abre la página y pregunta

@@ -57,7 +57,7 @@ function agregarAlCarrito(producto) {
   if (existente) {
     if (existente.cantidad >= limiteDe(existente)) {
       mostrarMensaje(`Solo hay ${limiteDe(existente)} de ${existente.nombre}.`);
-      return;
+      return false;
     }
     existente.cantidad += 1;
   } else {
@@ -73,6 +73,7 @@ function agregarAlCarrito(producto) {
   mostrarMensaje(`${producto.nombre} agregado al carrito.`);
   guardarCarrito(carrito);
   pintarCarrito();
+  return true;
 }
 
 // Sube o baja la cantidad de un producto ya en el carrito con los botones +/-;
@@ -103,6 +104,18 @@ function quitarDelCarrito(id) {
   pintarCarrito();
 }
 
+// Reinicia una animación CSS (clase "bump") aunque ya se haya ejecutado antes
+function animar(elemento) {
+  elemento.classList.remove("bump");
+  void elemento.offsetWidth;
+  elemento.classList.add("bump");
+}
+
+// Lo último que se dibujó, para animar solo lo que cambia (null = primera vez, sin animar)
+let idsPintados = null;
+let ultimoTotal = null;
+let ultimaCantidad = null;
+
 // Dibuja el carrito en pantalla a partir de lo que hay en localStorage.
 // La cantidad va en su propia columna (con botones - / +), separada del
 // nombre y del precio.
@@ -124,6 +137,7 @@ function pintarCarrito() {
     const nombre = escapar(item.nombre);
 
     const li = document.createElement("li");
+    if (idsPintados && !idsPintados.has(item.id)) li.classList.add("carrito-nuevo");
     li.innerHTML = `
       <span class="carrito-nombre">${nombre}</span>
       <span class="carrito-cantidad">
@@ -138,6 +152,20 @@ function pintarCarrito() {
   });
 
   total.textContent = suma.toLocaleString("es-MX");
+
+  // Contadores del carrito (menú superior y botón flotante del celular)
+  const cantidadTotal = carrito.reduce((n, item) => n + item.cantidad, 0);
+  document.querySelectorAll("[data-contador]").forEach((contador) => {
+    contador.textContent = cantidadTotal;
+    contador.hidden = cantidadTotal === 0;
+    if (ultimaCantidad !== null && ultimaCantidad !== cantidadTotal) animar(contador);
+  });
+
+  if (ultimoTotal !== null && ultimoTotal !== suma) animar(total.parentElement);
+
+  idsPintados = new Set(carrito.map((item) => item.id));
+  ultimoTotal = suma;
+  ultimaCantidad = cantidadTotal;
 }
 
 // Un solo listener en <ul id="carrito-lista"> atiende los clics de TODOS los
@@ -172,7 +200,10 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("btn-sincronizar")?.addEventListener("click", sincronizarCarrito);
 
   // Los botones "Agregar al carrito" de csr.js avisan con este evento
-  document.addEventListener("producto:agregar", (evento) => agregarAlCarrito(evento.detail));
+  // Si ya no hay unidades disponibles se cancela el evento, y csr.js no muestra "Agregado"
+  document.addEventListener("producto:agregar", (evento) => {
+    if (!agregarAlCarrito(evento.detail)) evento.preventDefault();
+  });
 
   // Estos eventos del navegador avisan cuando se pierde o regresa la conexión
   window.addEventListener("online", sincronizarCarrito);
