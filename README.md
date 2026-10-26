@@ -1,4 +1,4 @@
-# Nombre de tu negocio — PWA de ventas
+<img width="350" height="26" alt="image" src="https://github.com/user-attachments/assets/1bf549a6-659d-43ad-97a1-caa5fea42620" /># Nombre de tu negocio — PWA de ventas
 
 | Dato | Valor |
 |---|---|
@@ -14,7 +14,7 @@
 |---|---|---|
 | 1 | 69dfaa1 | 11/10/2026 |
 | 2 | e279872 | 18/10/2026 |
-| 3 | (hash del avance 3) | 25/10/2026 |
+| 3 | e263f75 | 25/10/2026 |
 | 4 | (se escribe en el reporte PDF) | 01/11/2026 |
 
 
