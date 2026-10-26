@@ -220,7 +220,7 @@ body {
   display: block;
   width: 100%;
   height: auto;
-  mix-blend-mode: normal;
+  filter: drop-shadow(0 14px 18px rgba(40, 48, 159, 0.16));
   animation: flotar 6s ease-in-out infinite;
 }
 
@@ -290,11 +290,23 @@ main section h2 {
   margin-bottom: 0;
 }
 
+/* Fila inferior: ofertas y mapa, a todo el ancho */
+.extras {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* La columna lateral ocupa toda la altura del menú; el carrito se queda fijo dentro de ella */
 .lateral {
+  align-self: stretch;
+}
+
+.lateral section {
   position: sticky;
   top: 92px;
-  display: grid;
-  gap: 1.5rem;
 }
 
 /* ==================== FILTROS POR CATEGORÍA ==================== */
@@ -540,10 +552,18 @@ button.boton--claro:hover {
 }
 
 .mapa {
-  height: 260px;
+  height: 320px;
   margin-top: 0.75rem;
   border: 2px solid var(--azul);
   border-radius: 12px;
+}
+
+/* Marcador del restaurante en el mapa: la mascota dentro de un círculo */
+.marcador-dante {
+  background: #fff;
+  border: 3px solid var(--azul);
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(40, 48, 159, 0.4);
 }
 
 /* ==================== CARRITO ==================== */
@@ -976,6 +996,10 @@ footer::before {
 
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 900px) {
+  .extras {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .fab {
     display: inline-flex;
   }
@@ -984,7 +1008,7 @@ footer::before {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .lateral {
+  .lateral section {
     position: static;
   }
 

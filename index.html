@@ -15,8 +15,7 @@
 
   <!-- Marca que hay JavaScript: así los elementos animados nunca se quedan ocultos sin él -->
   <script>document.documentElement.classList.add("js")</script>
-  <!-- ?v=2: obliga al navegador a descargar el CSS nuevo en vez de usar el guardado -->
-  <link rel="stylesheet" href="css/estilos.css?v=2">
+  <link rel="stylesheet" href="css/estilos.css">
 
   <!-- Leaflet: librería de mapas gratuita (sin API key) que usamos solo para
        dibujar la ruta hasta la sucursal (ver js/geolocalizacion.js) -->
@@ -53,7 +52,7 @@
         <p class="hero__descripcion">Caldos de horas, fideos al momento y entradas para compartir. Arma tu pedido aquí y recógelo en nuestra sucursal de Hermosillo.</p>
         <div class="hero__acciones">
           <a class="boton" href="#menu">Ver el menú</a>
-          <a class="boton boton--claro" href="#contacto">Cómo llegar</a>
+          <a class="boton boton--claro" href="#ubicacion">Cómo llegar</a>
         </div>
         <ul class="hero__datos">
           <li>Lunes a domingo</li>
@@ -62,7 +61,7 @@
         </ul>
       </div>
       <div class="hero__arte" aria-hidden="true">
-        <img src="icons/icon-512.png" alt="" width="512" height="512">
+        <img src="icons/mascota.png" alt="" width="720" height="720">
       </div>
     </div>
   </section>
@@ -140,7 +139,9 @@
         <button id="btn-sincronizar" class="boton boton--claro boton--bloque" type="button">Sincronizar carrito</button>
         <p id="carrito-mensaje" class="mensaje" aria-live="polite"></p>
       </section>
+    </aside>
 
+    <div class="extras">
       <!-- ---- Sección 3: Notificaciones ---- -->
       <section id="notificaciones" data-aparece>
         <h2>Ofertas</h2>
@@ -150,16 +151,16 @@
       </section>
 
       <!-- ---- Sección 4: Ubicación (característica del dispositivo) ---- -->
-      <!-- <section> -->
-        <!-- <h2>Distancia a la sucursal</h2> -->
-        <!-- <p class="sucursal-info">Sucursal única: <strong>Dante Ramen House</strong>, Av. Reforma 1234, Hermosillo, Sonora.</p> -->
-        <!-- <button id="btn-ubicacion" type="button">Usar mi ubicación</button> -->
-        <!-- <p id="ubicacion-mensaje" class="mensaje"></p> -->
+      <section id="ubicacion" data-aparece>
+        <h2>Cómo llegar</h2>
+        <p class="sucursal-info">Sucursal única: <strong>Dante Ramen House</strong>, Av. Reforma 1234, Hermosillo, Sonora.</p>
+        <button id="btn-ubicacion" class="boton boton--claro boton--bloque" type="button">Usar mi ubicación</button>
+        <p id="ubicacion-mensaje" class="mensaje" aria-live="polite"></p>
         <!-- Empieza oculto: geolocalizacion.js le quita "hidden" y lo llena de mapa
              en cuanto tiene tu ubicación y la ruta hasta la sucursal -->
-        <!-- <div id="mapa-ruta" class="mapa" hidden></div> -->
-      <!-- </section> -->
-    </aside>
+        <div id="mapa-ruta" class="mapa" hidden></div>
+      </section>
+    </div>
   </main>
 
   <footer id="contacto">
@@ -188,15 +189,15 @@
 
   <!-- Cargamos los scripts al final del <body>: así el HTML ya existe
        cuando el JavaScript intenta buscar los elementos con document.getElementById -->
-  <script src="js/carrito.js?v=2"></script>
-  <script src="js/csr.js?v=2"></script>
-  <script src="js/notificaciones.js?v=2"></script>
-  <script src="js/animaciones.js?v=2"></script>
+  <script src="js/carrito.js"></script>
+  <script src="js/csr.js"></script>
+  <script src="js/notificaciones.js"></script>
+  <script src="js/animaciones.js"></script>
   <!-- Leaflet debe cargar ANTES de geolocalizacion.js: ese script usa el
        objeto global "L" que esta librería crea -->
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script> -->
-  <!-- <script src="js/geolocalizacion.js"></script> -->
-  <script src="js/app.js?v=2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="js/geolocalizacion.js"></script>
+  <script src="js/app.js"></script>
   <!-- Registro del Service Worker. Va aquí, dentro del HTML y en una sola línea
        (navigator.serviceWorker.register("sw.js")), porque así lo detecta PWABuilder:
        lee el index.html buscando ese texto, y si no lo halla abre la página y pregunta
