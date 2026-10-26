@@ -27,3 +27,11 @@
 **CSR (index.html + csr.js):** el div del catálogo llega vacío y JavaScript lo llena después.
 
 ![Código fuente CSR](docs/captura-csr.jpeg)
+
+## Funciones PWA (avance 3)
+
+### index.html: manifest y registro del Service Worker activos
+![Código fuente index.html](docs/captura-index-pwa.png)
+
+### sw.js: Workbox precachea el catálogo y las fotos
+![Código fuente sw.js](docs/captura-sw.png)
