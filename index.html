@@ -5,11 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dante Ramen House - Ramen y Cocina Asiática</title>
   <meta name="description" content="Dante Ramen House: menú de ramen, entradas, bebidas y postres, carrito de compras y ubicación de la sucursal en Hermosillo, disponible incluso sin conexión.">
+  
   <script>document.documentElement.classList.add("js")</script>
-  <link rel="stylesheet" href="css/estilos.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 
-  <!-- PWA: manifest y registro del Service Worker (PWABuilder lee esta línea) -->
+  <!-- 1. Preconexión rápida a los servidores de fuentes y CDNs -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
+  <!-- 2. Carga asíncrona de Google Fonts (Evita los ~960 ms de bloqueo) -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" media="print" onload="this.media='all'">
+  <noscript>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+  </noscript>
+
+  <!-- 3. Preload de tu CSS local para acelerar su prioridad sin bloquear -->
+  <link rel="preload" href="css/estilos.css?v=1.1" as="style">
+  <link rel="stylesheet" href="css/estilos.css?v=1.1">
+
+  <!-- 4. Leaflet CSS Asíncrono -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" media="print" onload="this.media='all'">
+  <noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  </noscript>
+
+  <!-- PWA: manifest y registro del Service Worker -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#28309F">
   <link rel="icon" href="icons/icon-192.png" type="image/png">
@@ -21,13 +42,13 @@
     }
   </script>
 
-  <!-- Scripts: "defer" = se ejecutan al terminar de cargar el HTML, en este orden -->
+  <!-- Scripts con atributo defer -->
   <script src="js/carrito.js" defer></script>
   <script src="js/csr.js" defer></script>
   <script src="js/notificaciones.js" defer></script>
   <script src="js/animaciones.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
-  <script src="js/geolocalizacion.js" defer></script>
+  <script src="js/geolocalizacion.js?v=1.1" defer></script>
   <script src="js/app.js" defer></script>
 </head>
 <body>
@@ -70,7 +91,7 @@
         </ul>
       </div>
       <div class="hero__arte" aria-hidden="true">
-        <img src="icons/mascota.png" alt="" width="720" height="720">
+        <img src="icons/mascota.png" alt="" width="480" height="480">
       </div>
     </div>
   </section>
