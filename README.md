@@ -13,7 +13,7 @@
 | Avance | Hash del commit entregado | Fecha |
 |---|---|---|
 | 1 | 69dfaa1 | 11/10/2026 |
-| 2 | e279872 | 18/10/2026 |
+| 2 | c03ccc4  | 18/10/2026 |
 | 3 | e263f75 | 25/10/2026 |
 | 4 | (se escribe en el reporte PDF) | 01/11/2026 |
 
@@ -22,11 +22,11 @@
 
 **SSR (Django):** los productos ya vienen escritos en el HTML.
 
-![Código fuente SSR](docs/captura-ssr.jpeg)
+![Código fuente SSR](docs/captura-ssr.png)
 
 **CSR (index.html + csr.js):** el div del catálogo llega vacío y JavaScript lo llena después.
 
-![Código fuente CSR](docs/captura-csr.jpeg)
+![Código fuente CSR](docs/captura-csr.png)
 
 ## Funciones PWA (avance 3)
 

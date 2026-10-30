@@ -1,13 +1,5 @@
-// geolocalizacion.js — Acceso a una característica del dispositivo: el GPS/ubicación,
-// más un mapa (librería Leaflet) que dibuja la ruta real desde el usuario
-// hasta el restaurante, usando el servicio público de ruteo OSRM.
-// El navegador SIEMPRE pide permiso antes de compartir la ubicación.
-// Nota: por seguridad, esta API solo funciona en https:// o en localhost.
+// geolocalizacion.js — Acceso a la ubicación GPS y renderizado de ruta en Leaflet mediante OSRM.
 
-// Coordenadas de la única sucursal de Dante Ramen House.
-// OJO: son APROXIMADAS (centro de Hermosillo, cerca de la Plaza Zaragoza).
-// Para poner las exactas: en Google Maps haz clic derecho sobre tu local y
-// copia los dos números que aparecen arriba (latitud, longitud).
 const SUCURSAL = {
   nombre: "Dante Ramen House",
   direccion: "Av. Reforma 1234, Hermosillo, Sonora",
@@ -15,9 +7,7 @@ const SUCURSAL = {
   lon: -110.9559,
 };
 
-// Fórmula de Haversine: distancia en línea recta (km) entre dos puntos.
-// Se usa solo como respaldo si no se puede calcular la ruta real por calles
-// (sin internet, o si el servicio de ruteo no responde).
+// Fórmula de Haversine (respaldo en caso de fallo de red)
 function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
   const radioTierraKm = 6371;
   const aRadianes = (grados) => (grados * Math.PI) / 180;
@@ -33,25 +23,25 @@ function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
   return radioTierraKm * c;
 }
 
-// Le pide al servicio público OSRM la ruta real por calles entre el usuario y
-// el restaurante. OSRM es gratuito y no necesita API key, pero su servidor de
-// demostración no está pensado para producción (límite de peticiones);
-// en un proyecto real conviene un servidor propio o un proveedor de pago.
-// Devuelve { coords, distanciaKm, duracionMin } listo para dibujar, o null si falla.
+// Obtiene la ruta por calles desde el servidor OSRM
 async function obtenerRuta(origenLat, origenLon) {
-  const url =
-    "https://router.project-osrm.org/route/v1/driving/" +
-    `${origenLon},${origenLat};${SUCURSAL.lon},${SUCURSAL.lat}` +
-    "?overview=full&geometry=geojson";
+  // Aseguramos que las coordenadas estén formatedas estrictamente como números sin espacios
+  const origen = `${Number(origenLon)},${Number(origenLat)}`;
+  const destino = `${Number(SUCURSAL.lon)},${Number(SUCURSAL.lat)}`;
+
+  // Parámetros correctos: geometries=geojson (en plural) y sin espacios
+  const url = `https://router.project-osrm.org/route/v1/driving/${origen};${destino}?overview=full&geometries=geojson`;
 
   try {
     const respuesta = await fetch(url);
+    if (!respuesta.ok) return null;
+
     const datos = await respuesta.json();
-    if (datos.code !== "Ok") return null;
+    if (datos.code !== "Ok" || !datos.routes || datos.routes.length === 0) return null;
 
     const ruta = datos.routes[0];
     return {
-      // GeoJSON trae las coordenadas como [lon, lat]; Leaflet las quiere [lat, lon]
+      // OSRM devuelve [lon, lat]; Leaflet requiere [lat, lon]
       coords: ruta.geometry.coordinates.map(([lon, lat]) => [lat, lon]),
       distanciaKm: ruta.distance / 1000,
       duracionMin: ruta.duration / 60,
@@ -62,24 +52,20 @@ async function obtenerRuta(origenLat, origenLon) {
   }
 }
 
-let mapa; // instancia de Leaflet: se crea una sola vez y luego se reutiliza
+let mapa;
 
-// Dibuja el mapa con dos marcadores (tú y el restaurante) y la ruta entre ambos.
-// "coordsRuta" es un array de [lat, lon] devuelto por OSRM, o null si no se
-// pudo obtener: en ese caso se traza una línea recta punteada como respaldo.
 function dibujarMapa(origenLat, origenLon, coordsRuta) {
   const contenedor = document.getElementById("mapa-ruta");
+  if (!contenedor) return;
   contenedor.hidden = false;
 
   if (!mapa) {
-    // "L" es el objeto global que crea la librería Leaflet (cargada en index.html)
     mapa = L.map(contenedor);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: "&copy; colaboradores de OpenStreetMap",
       maxZoom: 19,
     }).addTo(mapa);
   } else {
-    // si ya existía un mapa de una búsqueda anterior, quita los marcadores/línea viejos
     mapa.eachLayer((capa) => {
       if (capa instanceof L.Marker || capa instanceof L.Polyline) mapa.removeLayer(capa);
     });
@@ -88,7 +74,6 @@ function dibujarMapa(origenLat, origenLon, coordsRuta) {
   const puntoUsuario = [origenLat, origenLon];
   const puntoSucursal = [SUCURSAL.lat, SUCURSAL.lon];
 
-  // El restaurante se marca con la mascota del logo (estilo en estilos.css)
   const iconoDante = L.icon({
     iconUrl: "icons/icon-192.png",
     iconSize: [46, 46],
@@ -104,14 +89,12 @@ function dibujarMapa(origenLat, origenLon, coordsRuta) {
   const linea = hayRuta ? coordsRuta : [puntoUsuario, puntoSucursal];
   const estiloLinea = hayRuta
     ? { color: "#28309F", weight: 5 }
-    : { color: "#F46255", weight: 3, dashArray: "6 6" }; // punteada = "línea recta", no ruta real
+    : { color: "#F46255", weight: 3, dashArray: "6 6" };
 
   L.polyline(linea, estiloLinea).addTo(mapa);
   mapa.fitBounds(L.latLngBounds([puntoUsuario, puntoSucursal]), { padding: [30, 30] });
 
-  // Bug común de Leaflet: si el contenedor estaba oculto (hidden) al crear el
-  // mapa, no calcula bien su tamaño hasta que se le avisa explícitamente.
-  setTimeout(() => mapa.invalidateSize(), 0);
+  setTimeout(() => mapa.invalidateSize(), 100);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -128,7 +111,6 @@ document.addEventListener("DOMContentLoaded", () => {
     mensaje.textContent = "Buscando tu ubicación…";
 
     navigator.geolocation.getCurrentPosition(
-      // función que se ejecuta SI el usuario acepta compartir su ubicación
       async (posicion) => {
         const { latitude, longitude } = posicion.coords;
         const mapaUrl = `https://www.openstreetmap.org/directions?from=${latitude}%2C${longitude}&to=${SUCURSAL.lat}%2C${SUCURSAL.lon}`;
@@ -150,7 +132,6 @@ document.addEventListener("DOMContentLoaded", () => {
             `<a href="${mapaUrl}" target="_blank" rel="noopener">Abrir en el mapa</a>`;
         }
       },
-      // función que se ejecuta SI el usuario rechaza o hay un error
       (error) => {
         mensaje.textContent = "No se pudo obtener tu ubicación: " + error.message;
       }
