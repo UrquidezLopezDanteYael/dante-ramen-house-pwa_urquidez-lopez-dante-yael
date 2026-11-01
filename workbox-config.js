@@ -20,5 +20,7 @@ module.exports = {
 	ignoreURLParametersMatching: [
 		/^utm_/,
 		/^fbclid$/
-	]
+	],
+	
+	importScripts: ["sw-extra.js"]
 };
