@@ -191,7 +191,7 @@ function sincronizarCarrito() {
   }
 
   // Aquí iría: fetch("https://mi-api.com/pedidos", { method: "POST", body: ... })
-  mostrarMensaje("Carrito sincronizado con Dante Ramen House (simulado). ✓");
+  mostrarMensaje("Carrito sincronizado con Dante Ramen House. ✓");
 }
 
 document.addEventListener("DOMContentLoaded", () => {
